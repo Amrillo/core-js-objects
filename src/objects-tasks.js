@@ -165,24 +165,25 @@ function sellTickets(queue) {
   let isTrue = true;
 
   queue.forEach((bill) => {
-    if (bill === BILL_50) {
-      if (obj[bill] !== 0) {
+    if (bill === BILL_25) {
+      obj[BILL_25] += 1; // Accept $25 bill
+    } else if (bill === BILL_50) {
+      if (obj[BILL_25] > 0) {
+        // Must have at least one $25 bill for change
         obj[BILL_25] -= 1;
         obj[BILL_50] += 1;
       } else {
-        isTrue = false;
+        isTrue = false; // No $25 bill for change
       }
     } else if (bill === BILL_100) {
-      if (obj[BILL_25] >= 3) {
-        obj[BILL_25] -= 3;
-      } else if (obj[BILL_50] >= 1 && obj[BILL_25] >= 2) {
-        obj[BILL_50] -= 1;
-        obj[BILL_25] -= 2;
+      if (obj[BILL_50] > 0 && obj[BILL_25] > 0) {
+        obj[BILL_50] -= 1; // Give one $50 bill
+        obj[BILL_25] -= 1; // Give one $25 bill
+      } else if (obj[BILL_25] >= 3) {
+        obj[BILL_25] -= 3; // Give three $25 bills
       } else {
-        isTrue = false;
+        isTrue = false; // Not enough change
       }
-    } else {
-      obj[BILL_25] += 1;
     }
   });
   return isTrue;
@@ -201,8 +202,13 @@ function sellTickets(queue) {
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
+
+  this.getArea = function getArea() {
+    return this.width * this.height;
+  };
 }
 
 /**
@@ -215,8 +221,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { height: 10, width: 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 /**
@@ -230,10 +236,10 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = JSON.parse(json);
+  return Object.assign(Object.create(proto), obj);
 }
-
 /**
  * Sorts the specified array by country name first and city name
  * (if countries are equal) in ascending order.
@@ -260,8 +266,13 @@ function fromJSON(/* proto, json */) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  return arr.sort((a, b) => {
+    if (a.country !== b.country) {
+      return a.country.localeCompare(b.country);
+    }
+    return a.city.localeCompare(b.city);
+  });
 }
 
 /**
@@ -294,8 +305,16 @@ function sortCitiesArray(/* arr */) {
  *    "Poland" => ["Lodz"]
  *   }
  */
-function group(/* array, keySelector, valueSelector */) {
-  throw new Error('Not implemented');
+function group(array, keySelector, valueSelector) {
+  return array.reduce((map, item) => {
+    const key = keySelector(item);
+    const value = valueSelector(item);
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+    map.get(key).push(value);
+    return map;
+  }, new Map());
 }
 
 /**
